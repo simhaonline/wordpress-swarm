@@ -1,0 +1,120 @@
+version: "3.5"
+
+services:
+
+  db: #https://store.docker.com/images/mariadb
+    image: mariadb
+    volumes:
+      - "wp-db:/var/lib/mysql:rw"
+    environment:
+      - "MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-root-pwd"
+      - "MYSQL_DATABASE_FILE=/run/secrets/db-name"
+      - "MYSQL_USER_FILE=/run/secrets/db-user"
+      - "MYSQL_PASSWORD_FILE=/run/secrets/db-user-pwd"
+    secrets:
+      - db-root-pwd
+      - db-name
+      - db-user
+      - db-user-pwd
+    networks:
+      - back
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 10s
+      update_config:
+        failure_action: rollback
+
+  php-wp: # based on https://store.docker.com/images/wordpress
+    image: php-wp
+    volumes:
+      - "wp-files:/var/www/html:rw"
+      - "./conf/tools:/tools:ro"
+      - "./conf/wp/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro"
+    environment:
+      - "WORDPRESS_DB_HOST=db:3306"
+      - "WORDPRESS_DB_NAME_FILE=/run/secrets/db-name"
+      - "WORDPRESS_DB_USER_FILE=/run/secrets/db-user"
+      - "WORDPRESS_DB_PASSWORD_FILE=/run/secrets/db-user-pwd"
+      - "WORDPRESS_TABLE_PREFIX_FILE=/run/secrets/wp-table-prefix"
+    secrets:
+      - db-name
+      - db-user
+      - db-user-pwd
+      - wp-table-prefix
+    networks:
+      - back
+    command: "bash /tools/wait-for-it.sh db:3306 -t 60 -- docker-entrypoint.sh php-fpm -F"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
+        window: 10s
+      update_config:
+        failure_action: rollback
+
+  nginx: #https://store.docker.com/images/nginx/
+    image: nginx
+    volumes:
+      - "wp-files:/usr/share/nginx/html:nocopy"
+      - "./conf/nginx/:/nginx:ro"
+      - "./conf/tools:/tools:ro"
+    networks:
+      - web
+      - back
+    ports:
+      - 80:80
+    environment:
+      - "PHP_FPM_HOST=php-wp:9000"
+      - "PHP_FPM_ROOT_DIR=/var/www/html"
+      - "NGINX_CONFIG_ROOT=/server"
+    command: "bash /nginx/start-nginx.sh"
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 5s
+      update_config:
+        failure_action: rollback
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=web"
+        - "traefik.port=80"
+        - "traefik.frontend.rule=Host:website.com"
+
+networks:
+  web:
+    external: true
+  back: {}
+
+volumes:
+  wp-files: {}
+  wp-db: {}
+
+secrets:
+  db-name:
+    file: secrets/db-name
+  db-user:
+    file: secrets/db-user
+  db-user-pwd:
+    file: secrets/db-user-pwd
+  wp-table-prefix:
+    file: secrets/wp-table-prefix
+  db-root-pwd:
+    file: secrets/db-root-pwd
