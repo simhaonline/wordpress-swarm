@@ -73,8 +73,6 @@ services:
     networks:
       - web
       - back
-    ports:
-      - 80:80
     environment:
       - "PHP_FPM_HOST=php-wp:9000"
       - "PHP_FPM_ROOT_DIR=/var/www/html"
