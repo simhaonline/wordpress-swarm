@@ -32,27 +32,6 @@ fi
 
 STACKNAME="$1"
 
-
-SECRETS=(
-      "db-root-pwd"
-      'db-name'
-      'db-user'
-      'db-user-pwd'
-      'wp-table-prefix'
-  )
-
-for i in ${SECRETS[@]}
-do
-  if [ "`docker secret ls -q -f name=$STACKNAME-$i`" == "" ]
-    then
-
-      echo "Error: secret '$STACKNAME-$i' does not exist. Create it before deploying stack"
-      exit -2
-
-  fi
-
-done
-
 StackFile="$SCRIPT_DIR/swarm.yml"
 
 STACKNAME=$STACKNAME docker stack deploy -c $StackFile "$1"
