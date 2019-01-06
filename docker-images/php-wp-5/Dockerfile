@@ -1,4 +1,4 @@
-FROM wordpress:php7.2-fpm-alpine
+FROM wordpress:5-php7.2-fpm-alpine
 
 RUN apk add --no-cache libmemcached-dev ${PHPIZE_DEPS} zlib-dev \
     && pecl install memcached \

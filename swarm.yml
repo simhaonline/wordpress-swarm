@@ -32,7 +32,7 @@ services:
         failure_action: rollback
 
   php-wp: # based on https://store.docker.com/images/wordpress
-    image: toussa/php-wp
+    image: toussa/php-wp-5
     volumes:
       - "wp-files:/var/www/html:rw"
       - "./conf/tools:/tools:ro"
