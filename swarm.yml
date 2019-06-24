@@ -65,7 +65,7 @@ services:
         failure_action: rollback
 
   nginx: #https://store.docker.com/images/nginx/
-    image: nginx:stable
+    image: nginx:mainline
     volumes:
       - "wp-files:/usr/share/nginx/html:nocopy"
       - "./conf/nginx/:/nginx:ro"
