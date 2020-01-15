@@ -32,7 +32,7 @@ services:
         failure_action: rollback
 
   php-wp: # based on https://store.docker.com/images/wordpress
-    image: toussa/php-wp
+    image: toussa/wp-fpm-alpine
     volumes:
       - "wp-files:/var/www/html:rw"
       - "./conf/tools:/tools:ro"
@@ -65,7 +65,7 @@ services:
         failure_action: rollback
 
   nginx: #https://store.docker.com/images/nginx/
-    image: nginx
+    image: nginx:mainline
     volumes:
       - "wp-files:/usr/share/nginx/html:nocopy"
       - "./conf/nginx/:/nginx:ro"
