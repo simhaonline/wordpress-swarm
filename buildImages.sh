@@ -17,5 +17,5 @@ fi
 for i in $(ls docker-images/)
 do
   
-  docker build -f $DIR/docker-images/$i/Dockerfile -t $AUTHOR/$i $DIR/docker-images/$i/
+  docker build --pull -f $DIR/docker-images/$i/Dockerfile -t $AUTHOR/$i $DIR/docker-images/$i/
 done
