@@ -93,9 +93,13 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=web"
-        - "traefik.port=80"
-        - "traefik.frontend.rule=Host:website.com"
-
+        - "traefik.http.routers.my_router.rule=Host(`website.com`) || Host(`www.website.com`)"
+        - "traefik.http.routers.my_router.tls=true"
+        - "traefik.http.routers.my_router.tls.certresolver=my_resolver"
+        - "traefik.http.routers.my_router.tls.domains[0].main=website.com"
+        - "traefik.http.routers.my_router.tls.domains[0].sans=www.website.com"
+        - "traefik.http.routers.my_router.entryPoints=websecure"
+        - "traefik.http.services.my_srv.loadbalancer.server.port=80"
 networks:
   web:
     external: true
