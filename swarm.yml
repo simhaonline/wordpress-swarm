@@ -3,7 +3,7 @@ version: "3.5"
 services:
 
   db: #https://store.docker.com/images/mariadb
-    image: mariadb
+    image: mariadb:10.4
     volumes:
       - "wp-db:/var/lib/mysql:rw"
     environment:
